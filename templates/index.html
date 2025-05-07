@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Search Engine</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        input[type="text"] {
+            width: 70%;
+            padding: 10px;
+            font-size: 16px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #results {
+            margin-top: 20px;
+        }
+        .result {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>File Search Engine</h1>
+    <form id="search-form">
+        <input type="text" id="query" placeholder="Enter an English sentence..." required>
+        <button type="submit">Search</button>
+    </form>
+    <div id="results"></div>
+
+    <script>
+        document.getElementById('search-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const query = document.getElementById('query').value;
+            const response = await fetch('/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `query=${encodeURIComponent(query)}`
+            });
+            const results = await response.json();
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+            if (results.length === 0) {
+                resultsDiv.innerHTML = '<p>No results found.</p>';
+                return;
+            }
+            results.forEach(result => {
+                const div = document.createElement('div');
+                div.className = 'result';
+                div.innerHTML = `
+                    <strong>File Name:</strong> ${result.file_name}<br>
+                    <strong>FTP Path:</strong> ${result.ftp_path}<br>
+                    <strong>Size:</strong> ${result.size} bytes<br>
+                    <strong>Modified:</strong> ${result.modified}<br>
+                    <strong>Score:</strong> ${result.score}
+                `;
+                resultsDiv.appendChild(div);
+            });
+        });
+    </script>
+</body>
+</html>
